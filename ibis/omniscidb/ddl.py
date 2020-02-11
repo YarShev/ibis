@@ -5,6 +5,8 @@ import ibis
 from ibis.sql.compiler import DDL, DML
 
 from .compiler import _type_to_sql_string, quote_identifier
+from .client import OmniSciDBDataType
+from ibis.common import exceptions
 
 fully_qualified_re = re.compile(r"(.*)\.(?:`(.*)`|(.*))")
 
@@ -51,7 +53,6 @@ class DropObject(OmniSciDBDDL):
         object_name = self._object_name()
         return 'DROP {} {}{}'.format(self._object_type, if_exists, object_name)
 
-
 class DropTable(DropObject):
     """Drop table class."""
 
@@ -65,7 +66,6 @@ class DropTable(DropObject):
 
     def _object_name(self):
         return self._get_scoped_name(self.table_name, self.database)
-
 
 def _format_properties(props):
     tokens = []
@@ -373,6 +373,46 @@ class RenameTable(AlterTable):
         cmd = '{} RENAME TO {}'.format(
             self.old_qualified_name, self.new_qualified_name
         )
+        return self._wrap_command(cmd)
+
+class AddColumn(AlterTable):
+    """Add Column class."""
+
+    def __init__(self, table_name, column_name, data_type):
+        super().__init__(table_name)
+        self.column_name = column_name
+        self.data_type = data_type
+
+    def compile(self):
+        """Compile the Add Column expression.
+
+        Returns
+        -------
+        string
+        """
+        unsupported_types = ['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON']
+        if self.data_type in unsupported_types:
+            raise exceptions.UnsupportedBackendType('The given type is not supported by the backend')
+        else:
+            if self.data_type in OmniSciDBDataType.dtypes:
+            cmd = '{} ADD COLUMN {} {}'.format(self.table, self.column_name, self.data_type)
+            return self._wrap_command(cmd)
+
+class DropColumn(AlterTable):
+    """Drop Column class."""
+
+    def __init__(self, table_name, column_name):
+        super().__init__(table_name)
+        self.column_name = column_name
+
+    def compile(self):
+        """Compile the Drop Column expression.
+
+        Returns
+        -------
+        string
+        """
+        cmd = '{} DROP COLUMN {}'.format(self.table, self.self.column_name)
         return self._wrap_command(cmd)
 
 
