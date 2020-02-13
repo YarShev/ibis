@@ -100,6 +100,14 @@ def test_union_op(alltypes):
         expr.compile()
 
 
+def test_add_column(con):
+    test_table = ibis.table([('a', 'int32'), ('b', 'int64')], name='test_table')
+    con.add_column()
+
+def test_drop_column(con):
+    test_table = ibis.table([('a', 'int32'), ('b', 'int64')], name='test_table')
+    con.drop_column()
+
 def test_create_table_schema(con):
     t_name = 'mytable'
 

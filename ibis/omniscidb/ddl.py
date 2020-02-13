@@ -445,7 +445,7 @@ class DropColumn(AlterTable):
         -------
         string
         """
-        cmd = '{} DROP COLUMN {};'.format(self.table, self.self.column_name)
+        cmd = '{} DROP COLUMN {};'.format(self.table, self.column_name)
         return self._wrap_command(cmd)
 
 
