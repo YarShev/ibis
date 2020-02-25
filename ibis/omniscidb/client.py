@@ -993,6 +993,31 @@ class OmniSciDBClient(SQLClient):
         self._execute(statement, False)
         self.set_database(_database)
 
+    def create_table_ase(self, table_name_to, table_name_from, limit = 1, database = None, *args, **kargs):
+        """
+        Create a table as select extract from another table.
+        Parameters
+        ----------
+        table_name_to : string
+        table_name_from : string
+        limit : int
+        database : string
+        args : list
+        kargs : dictionary
+        Examples
+        --------
+        >>> table_name_to = 'my_table_2'
+        >>> table_name_from = 'my_table_1'
+        >>> limit = '10'
+        >>> database = 'my_database'
+        >>> args = 'my_month', 'my_year'
+        >>> kargs = MONTH = 'any_month', YEAR = 'any_year'
+        >>> con.create_table_ase(table_name_to, table_name_from, limit, database, my_month, my_year, MONTH = 'any_month', YEAR = 'any_year')
+        """
+
+        statement = ddl.CTASE(table_name_to, table_name_from, limit = limit, database = database, *args, **kargs)
+        self._execute(statement, False)
+
     def truncate_table(self, table_name, database=None):
         """
         Delete all rows from, but do not drop, an existing table.
