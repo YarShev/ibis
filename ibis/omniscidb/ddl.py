@@ -116,38 +116,6 @@ class CreateTable(CreateDDL):
         """
         return '\n'.join(self.pieces)
 
-class CTASE(CreateTable):
-    """Create Table As Select Extract class.
-    Parameters
-    ----------
-    table_name : string
-    database : string
-    args : list
-    kargs : dictionary
-    """
-
-    def __init__(self, table_name_to, table_name_from, limit = 1, database=None, *args, **kargs):
-        super().__init__(table_name_to, database)
-        self.table_name_from = table_name_from
-        self.limit = limit
-        self.list_cols_to = []
-        for arg in args:
-            list_cols_to.append(arg)
-        self.dict_cols_from = {}
-        for key, value in kargs.items():
-            self.dict_cols_from[key] = value
-
-    def _pieces(self):
-        list_size = len(self.list_cols_to)
-        iteration_idx = 0
-        yield 'AS (SELECT '
-        for key, val in self.dict_cols_from.items():
-            if iteration_idx != list_size - 1:
-                yield 'EXTRACT ({} FROM {}) {},'.format(key, val, self.list_cols_to[iteration_idx])
-            else:
-                yield 'EXTRACT ({} FROM {}) {}'.format(key, val, self.list_cols_to[iteration_idx])
-            iteration_idx += 1
-        yield 'FROM {} LIMIT {});'.format(self.table_name_from, str(self.limit))
 
 class CreateTableWithSchema(CreateTable):
     """Create Table With Schema class."""
@@ -370,6 +338,27 @@ class AlterTable(OmniSciDBDDL):
         props = self._format_properties()
         action = '{} SET {}'.format(self.table, props)
         return self._wrap_command(action)
+
+
+class InsertIntoTable(OmniSciDBDDL):
+    """Alter Table class."""
+
+    def __init__(self, table, select_stmt):
+        self.table = table
+        self.select_stmt = select_stmt
+
+    def _wrap_command(self, cmd):
+        return 'INSERT INTO {}'.format(cmd)
+
+    def compile(self):
+        """Compile the Insert Into Table expression.
+
+        Returns
+        -------
+        string
+        """
+        compiled_expr = self.select_stmt.compile()
+        return self._wrap_command(compiled_expr)
 
 
 class RenameTable(AlterTable):
