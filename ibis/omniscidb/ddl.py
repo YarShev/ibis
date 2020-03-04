@@ -348,7 +348,7 @@ class InsertIntoTable(OmniSciDBDDL):
         self.select_stmt = select_stmt
 
     def _wrap_command(self, cmd):
-        return 'INSERT INTO {}'.format(cmd)
+        return 'INSERT INTO {} {};'.format(self.table, cmd)
 
     def compile(self):
         """Compile the Insert Into Table expression.
@@ -358,7 +358,8 @@ class InsertIntoTable(OmniSciDBDDL):
         string
         """
         compiled_expr = self.select_stmt.compile()
-        return self._wrap_command(compiled_expr)
+        changed = re.sub('AS tmp\n', '', compiled_expr)
+        return self._wrap_command(changed)
 
 
 class RenameTable(AlterTable):
