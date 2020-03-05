@@ -415,6 +415,7 @@ class InsertIntoSelect(Insert):
         """
         select = self.select.compile()
         select = re.sub('AS tmp\n', '', select)
+        select = re.sub('\n', ' ', select)
 
         cmd = select if not self.dst_cols else ''.join(
             self._get_dst_cols_cmd()) + select
