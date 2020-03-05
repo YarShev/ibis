@@ -382,10 +382,6 @@ class InsertInto(Insert):
             sep = ', '
         yield ')'
 
-    def _get_full_cmd(self):
-        self._get_dst_cols_cmd()
-        self._get_vals_cmd()
-
     def compile(self):
         """Compile the Insert Into expression.
 
@@ -393,9 +389,11 @@ class InsertInto(Insert):
         -------
         string
         """
+        
         cmd = ''.join(self._get_vals_cmd()
                       if not self.dst_cols
-                      else self._get_full_cmd())
+                      else self._get_dst_cols_cmd())
+        cmd = cmd + ''.join(self._get_vals_cmd())
         return self._wrap_command(cmd)
 
 
@@ -418,7 +416,7 @@ class InsertIntoSelect(Insert):
         select = re.sub('AS tmp\n', '', select)
 
         cmd = select if not self.dst_cols else ''.join(
-            self._get_dst_cols_cmd(dst_cols)) + select
+            self._get_dst_cols_cmd()) + select
 
         return self._wrap_command(cmd)
 
