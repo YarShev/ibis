@@ -389,11 +389,12 @@ class InsertInto(Insert):
         -------
         string
         """
-        
-        cmd = ''.join(self._get_vals_cmd()
-                      if not self.dst_cols
-                      else self._get_dst_cols_cmd())
-        cmd = cmd + ''.join(self._get_vals_cmd())
+        if not self.dst_cols:
+            cmd = ''.join(self._get_vals_cmd())
+        else:
+            cmd = ''.join(self._get_dst_cols_cmd) + \
+                ''.join(self._get_vals_cmd())
+
         return self._wrap_command(cmd)
 
 
