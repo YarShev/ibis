@@ -400,7 +400,7 @@ class InsertInto(Insert):
 
 
 class InsertIntoSelect(Insert):
-    """Insert Into class."""
+    """Insert Into Select class."""
 
     def __init__(self, table_name, select, dst_cols=None, where=None):
         super().__init__(table_name)
