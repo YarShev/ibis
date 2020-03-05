@@ -479,13 +479,13 @@ class OmniSciDBTable(ir.TableExpr, DatabaseEntity):
         dst_values : list
             Set list of values for table's column(s)
         dst_cols : list, optional
-            Set list of table's column(s) for which values are provided.
+            Set list of table's column(s) for which values are provided
         """
         stmt = ddl.InsertInto(
             self._qualified_name, dst_values, dst_cols=dst_cols)
         return self._execute(stmt)
 
-    def insert_into_select(self, select, dst_cols=None, where=None):
+    def insert_into_select(self, select, dst_cols=None):
         """
         Copies data from one table and inserts it into another table.
 
@@ -494,14 +494,11 @@ class OmniSciDBTable(ir.TableExpr, DatabaseEntity):
         select : ibis TableExpr
             Set selection ibis expression
         dst_cols : list, optional
-            Set list of table's column(s) into which data will be coppied.
-        where : string, optional
-            Set condition of where clause due to that
-            copy will be fulfillled.
+            Set list of table's column(s) into which data will be coppied
         """
 
         stmt = ddl.InsertIntoSelect(
-            self._qualified_name, select, dst_cols=dst_cols, where=where)
+            self._qualified_name, select, dst_cols=dst_cols)
         return self._execute(stmt)
 
     def _alter_table_helper(self, f, **alterations):

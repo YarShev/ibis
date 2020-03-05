@@ -402,11 +402,10 @@ class InsertInto(Insert):
 class InsertIntoSelect(Insert):
     """Insert Into Select class."""
 
-    def __init__(self, table_name, select, dst_cols=None, where=None):
+    def __init__(self, table_name, select, dst_cols=None):
         super().__init__(table_name)
         self.select = select
         self.dst_cols = dst_cols
-        self.where = where
 
     def compile(self):
         """Compile the Insert Into Select expression.
@@ -421,7 +420,6 @@ class InsertIntoSelect(Insert):
         cmd = select if not self.dst_cols else ''.join(
             self._get_dst_cols_cmd(dst_cols)) + select
 
-        cmd = cmd + '' if not self.where else self.where)
         return self._wrap_command(cmd)
 
 
@@ -429,24 +427,24 @@ class RenameTable(AlterTable):
     """Rename Table class."""
 
     def __init__(
-        self, old_name, new_name, old_database = None, new_database = None
+        self, old_name, new_name, old_database=None, new_database=None
     ):
         # if either database is None, the name is assumed to be fully scoped
-        self.old_name=old_name
-        self.old_database=old_database
-        self.new_name=new_name
-        self.new_database=new_database
+        self.old_name = old_name
+        self.old_database = old_database
+        self.new_name = new_name
+        self.new_database = new_database
 
-        new_qualified_name=new_name
+        new_qualified_name = new_name
         if new_database is not None:
-            new_qualified_name=self._get_scoped_name(new_name, new_database)
+            new_qualified_name = self._get_scoped_name(new_name, new_database)
 
-        old_qualified_name=old_name
+        old_qualified_name = old_name
         if old_database is not None:
-            old_qualified_name=self._get_scoped_name(old_name, old_database)
+            old_qualified_name = self._get_scoped_name(old_name, old_database)
 
-        self.old_qualified_name=old_qualified_name
-        self.new_qualified_name=new_qualified_name
+        self.old_qualified_name = old_qualified_name
+        self.new_qualified_name = new_qualified_name
 
     def compile(self):
         """Compile the Rename Table expression.
@@ -455,7 +453,7 @@ class RenameTable(AlterTable):
         -------
         string
         """
-        cmd='{} RENAME TO {}'.format(
+        cmd = '{} RENAME TO {}'.format(
             self.old_qualified_name, self.new_qualified_name
         )
         return self._wrap_command(cmd)
