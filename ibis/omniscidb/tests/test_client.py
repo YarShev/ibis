@@ -104,6 +104,61 @@ def test_union_op(alltypes):
         expr.compile()
 
 
+def test_insert_into(con):
+    table_name = 'my_table'
+
+    con.drop_table(table_name, force=True)
+
+    schema = ibis.schema([('a', 'int32'), ('b', 'float')])
+    con.create_table(table_name, schema=schema)
+
+    try:
+        res_tbl = con.table(table_name)
+
+        dst_vals = [1, 2.0]
+        dst_cols = ['a', 'b']
+        res_tbl.insert_into(dst_vals, dst_cols)
+
+        res_tbl = con.table(table_name)
+
+        for idx in range(len(dst_cols)):
+            assert dst_cols[idx] in res_tbl.schema().names
+            assert dst_vals[idx] == res_tbl[dst_cols[idx]]
+    finally:
+        con.drop_table(table_name)
+
+
+def test_insert_into_select(con):
+    table_name_1 = 'my_table_1'
+    table_name_2 = 'my_table_2'
+
+    con.drop_table(table_name_1, force=True)
+
+    schema = ibis.schema([('a', 'int32'), ('b', 'float')])
+    con.create_table(table_name_1, schema=schema)
+    con.create_table(table_name_2, schema=schema)
+
+    res_tbl_1 = con.table(table_name_1)
+
+    dst_vals = [1, 2.0]
+    dst_cols = ['a', 'b']
+    res_tbl_1.insert_into(dst_vals, dst_cols)
+
+    try:
+        res_tbl_1 = con.table(table_name_1)
+        res_tbl_2 = con.table(table_name_2)
+
+        res_tbl_2.insert_into_select(res_tbl_1['a', 'b'], dst_cols)
+
+        res_tbl_2 = con.table(table_name_2)
+
+        for idx in range(len(dst_cols)):
+            assert res_tbl_1[idx] == res_tbl_2[idx]
+    finally:
+        con.drop_table(table_name_1)
+        con.drop_table(table_name_2)
+
+
 def test_create_table_schema(con):
     t_name = 'mytable'
 
