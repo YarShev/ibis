@@ -8,6 +8,7 @@ import ibis.expr.types as ir
 import ibis.sql.compiler as comp
 import ibis.util as util
 from ibis.config import options
+from timeit import default_timer as timer
 
 
 class Client:
@@ -32,7 +33,9 @@ class Query:
         )
 
         if not isinstance(sql, str):
+            t0 = timer()
             self.compiled_sql = sql.compile()
+            print('sql.compile', timer() - t0)
         else:
             self.compiled_sql = sql
 
@@ -51,7 +54,9 @@ class Query:
         """
         # synchronous by default
         with self.client._execute(self.compiled_sql, results=True) as cur:
+            t0 = timer()
             result = self._fetch(cur)
+            print('self._fetch(cur) =', timer() - t0)
 
         return self._wrap_result(result)
 
@@ -209,12 +214,16 @@ class SQLClient(Client, metaclass=abc.ABCMeta):
           Array expressions: pandas.Series
           Scalar expressions: Python scalar value
         """
+        t0 = timer()
         query_ast = self._build_ast_ensure_limit(expr, limit, params=params)
+        print('self._build_ast_ensure_limit =', timer() - t0)
         result = self._execute_query(query_ast, **kwargs)
         return result
 
     def _execute_query(self, dml, **kwargs):
+        t0 = timer()
         query = self.query_class(self, dml, **kwargs)
+        print('self.query_class =', timer() - t0)
         return query.execute()
 
     def compile(self, expr, params=None, limit=None):
